@@ -13,9 +13,15 @@ This project focuses on pricing financial derivatives using several models, incl
 - You can either give the vanilla pricer fixed parameters: spot level, dividend yield, volatility 
  that are necessary or put simply a ticker with a strike, maturity and rf rate.
 - When pricing a ticker instead of fixed parameters, 
- data retrieval is done via yFinance API: Automatically fetches relevant market data (such as historical volatility, dividends, spot level) for the specified ticker to use in pricing models.
-- Note: Due to limitations of the yFinance API, it may not provide complete data for some tickers, particularly when attempting to calibrate or use the SABR model due to insufficient or non-existent options quotes.
+ data retrieval is done via yFinance API: Automatically fetches relevant market data (such as historical volatility as vol param, dividends, spot level) for the specified ticker to use in pricing models.
+
+## Notes
+
+- Longstaff-Schwartz Monte Carlo was modified to use the next step simulated cashflows instead of the actual payoffs in the backwards regression since prices were closer to the binomial tree ones
+- Due to limitations of the yFinance API, it may not provide complete data for some tickers, particularly when attempting to calibrate or use the SABR model due to insufficient or non-existent options quotes.
 - Tickers that I used to test my code and seem to have enough data are for example 'AAPL', 'AMZN'
+
+
 
 ## To Do
 
