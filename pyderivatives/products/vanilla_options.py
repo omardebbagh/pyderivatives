@@ -153,46 +153,34 @@ class VanillaOption:
         else:
             raise ValueError("Invalid option type. Choose 'call' or 'put'.")
 
-        # Initialize the optimal cash flow matrix with zeros
-        cash_flows = np.zeros((num_paths, num_steps + 1))
+        # Backward recursive process to update the optimal cash flows
+        option_cash_flows = payoffs[:, -1]  # Initialize option values at maturity
 
-        # Backward recursive process to fill the cash flow matrix
-        option_values = payoffs[:, -1]  # Initialize option values at maturity
-        for time_step in range(num_steps - 1, 0, -1):  # Iterate backward from the second last time step to the first
+        for time_step in range(num_steps - 1, 0, -1):
             # Only consider paths that are in-the-money
             in_the_money = payoffs[:, time_step] > 0
             if np.sum(in_the_money) == 0:
                 continue  # Skip if no paths are in-the-money
 
             # Fit a least-squares polynomial regression to estimate continuation value
-            x = paths[in_the_money, time_step]  # Stock prices at time step where in the money
-            y = option_values[in_the_money] * discount_factor  # Discounted cash flows at time step + 1
+            # Unlike the paper we do not use the actual option cash-flows(payoff) of the next time step in the regresion
+            x = paths[in_the_money, time_step]
+            y = option_cash_flows[in_the_money] * discount_factor
             A = np.vstack([np.ones_like(x), x, x ** 2]).T
-            coeffs = np.linalg.lstsq(A, y, rcond=None)[0]  # Polynomial coefficients
+            coeffs = np.linalg.lstsq(A, y, rcond=None)[0]
 
             # Calculate the estimated continuation value
-            continuation_values = coeffs[0] + coeffs[1] * x + coeffs[2] * x ** 2
+            continuation_value = coeffs[0] + coeffs[1] * x + coeffs[2] * x ** 2
 
             # Determine whether to exercise the option or not
-            exercise_values = payoffs[in_the_money, time_step]
-            exercise_decision = exercise_values > continuation_values
+            exercise_value = payoffs[in_the_money, time_step]
+            option_cash_flows[in_the_money] = np.where(exercise_value > continuation_value, exercise_value,
+                                                   option_cash_flows[in_the_money] * discount_factor)
 
-            # Update cash flows matrix based on the exercise decision
-            cash_flows[in_the_money, time_step] = np.where(exercise_decision,
-                                                           exercise_values * discount_factor**time_step, 0)
-            cash_flows[in_the_money, time_step + 1] = np.where(~exercise_decision,
-                                                               option_values[in_the_money] * discount_factor ** (time_step+ 1),
-                                                               0)
+        # Get the option price by averaging the discounted cash flows and discount back to present value
+        option_price = np.mean(option_cash_flows) * np.exp(-self.risk_free_rate * dt)
 
-            # Update option values to use for next time step regression
-            option_values = payoffs[:, time_step]
-
-            # Ensure no future cash flows in paths where option is exercised
-            exercised_paths = np.where(in_the_money)[0][exercise_decision]  # Indices of exercised paths
-            for idx in exercised_paths:
-                cash_flows[idx, time_step + 1:] = 0
-
-        return np.sum(cash_flows)/num_paths
+        return option_price
 
     def _sabr_model_calibrated(self) -> Dict[str, Any]:
         if isinstance(self._udl_spot, str):
