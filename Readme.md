@@ -1,4 +1,4 @@
-# pyderivatives - Derivatives Pricing with Black-Scholes, Monte Carlo (MC), LS-MC, and SABR Volatility Model
+# pyderivatives - Derivatives Pricing with Black-Scholes, Monte Carlo (MC), Longstaff-Schwartz method, and SABR Volatility Model
 
 ## Project Overview
 
