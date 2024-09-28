@@ -6,10 +6,10 @@ PRICING_MODELS = ['Black-Scholes', 'MC', 'LS-MC', 'SABR Vol']
 def main():
 
     ticker_or_spot = "AAPL"  # APPLE ticker for example - can put fixed spot instead
-    maturity = 1.5
+    maturity = 1.5  # In years
     strike = 200
     risk_free_rate = 0.04
-    option_type = 'put'  # put
+    option_type = 'put'  # call
     option_style = 'EUR'  # US
     sigma = None  # need to have value if fixed spot instead of ticker
     div_yield = None
