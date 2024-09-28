@@ -11,8 +11,8 @@ This project focuses on pricing financial derivatives using several models, incl
 ## Features
 
 - You can either give the vanilla pricer fixed parameters: spot level, dividend yield, volatility 
- that are necessary or put simply a ticker with a strike, maturity and rf rate.
-- When pricing a ticker instead of fixed parameters, 
+ that are necessary or put simply a ticker with a strike, maturity and risk-free rate.
+- When pricing with a ticker instead of fixed parameters, 
  data retrieval is done via yFinance API: Automatically fetches relevant market data (such as historical volatility as vol param, dividends, spot level) for the specified ticker to use in pricing models.
 
 ## Notes
